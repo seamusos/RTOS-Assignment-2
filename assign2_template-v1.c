@@ -1,8 +1,10 @@
 /***********************************************************************************/
 //***********************************************************************************
 //            *************NOTE**************
-// This is a template for the subject of RTOS in University of Technology Sydney(UTS)
-// Please complete the code based on the assignment requirement.
+//                 RTOS UTS Assignment 2
+//Group Members:
+//  Seamus O'Sullivan     12045959
+//  Alastair Bate         12585826
 
 //***********************************************************************************
 /***********************************************************************************/
@@ -57,7 +59,7 @@ int main(int argc, char const *argv[]) {
   pthread_attr_t attr;
   ThreadParams params;
 
-    
+
   // Initialization
   initializeData(&params);
   pthread_attr_init(&attr);
@@ -84,7 +86,7 @@ if(pthread_create(&tid3, &attr, ThreadC, (void*)(&params))!=0)
       exit(-1);
   }
   //TODO: add your code
- 
+
 
   // Wait on threads to finish
   pthread_join(tid1, NULL);
@@ -98,7 +100,7 @@ if(pthread_create(&tid3, &attr, ThreadC, (void*)(&params))!=0)
 void initializeData(ThreadParams *params) {
   // Initialize Sempahores
   sem_init(&(params->sem_read), 0, 1);
-  
+
   //TODO: add your code
 
   return;
@@ -106,13 +108,13 @@ void initializeData(ThreadParams *params) {
 
 void *ThreadA(void *params) {
   //TODO: add your code
-  
+
 printf("ThreadA\n");
 }
 
 void *ThreadB(void *params) {
   //TODO: add your code
-  
+
  printf("ThreadB\n");
 }
 
