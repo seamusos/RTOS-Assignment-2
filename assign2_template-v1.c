@@ -14,20 +14,21 @@
   gcc prog_1.c -o prog_1 -lpthread -lrt
 
 */
-#include  <pthread.h>
-#include  <stdlib.h>
-#include  <unistd.h>
-#include  <stdio.h>
-#include  <sys/types.h>
-#include  <fcntl.h>
-#include  <string.h>
-#include  <sys/stat.h>
-#include  <semaphore.h>
-#include  <sys/time.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <semaphore.h>
+#include <sys/time.h>
 
 /* --- Structs --- */
 
-typedef struct ThreadParams {
+typedef struct ThreadParams
+{
   int pipeFile[2];
   sem_t sem_read, sem_justify, sem_write;
   char message[255];
@@ -49,44 +50,47 @@ void *ThreadB(void *params);
 void *ThreadC(void *params);
 
 /* --- Main Code --- */
-int main(int argc, char const *argv[]) {
+int main(int argc, char const *argv[])
+{
   struct timeval t1;
-  gettimeofday(&t1, NULL);  // Start Timer
-  int fd[2]; //File descriptor for creating a pipe
+  gettimeofday(&t1, NULL); // Start Timer
+  int fd[2];               //File descriptor for creating a pipe
 
   int result;
   pthread_t tid1, tid2, tid3; //Thread ID
   pthread_attr_t attr;
   ThreadParams params;
 
-
   // Initialization
   initializeData(&params);
   pthread_attr_init(&attr);
 
   // Create pipe
-  result = pipe (fd);
-   if (result < 0){ perror("pipe error");exit(1); }
+  result = pipe(fd);
+  if (result < 0)
+  {
+    perror("pipe error");
+    exit(1);
+  }
 
   // Create Threads
-  if(pthread_create(&tid1, &attr, ThreadA, (void*)(&params))!=0)
+  if (pthread_create(&tid1, &attr, ThreadA, (void *)(&params)) != 0)
   {
-	  perror("Error creating threads: ");
-      exit(-1);
+    perror("Error creating threads: ");
+    exit(-1);
   }
 
- if(pthread_create(&tid2, &attr, ThreadB, (void*)(&params))!=0)
+  if (pthread_create(&tid2, &attr, ThreadB, (void *)(&params)) != 0)
   {
-	  perror("Error creating threads: ");
-      exit(-1);
+    perror("Error creating threads: ");
+    exit(-1);
   }
-if(pthread_create(&tid3, &attr, ThreadC, (void*)(&params))!=0)
+  if (pthread_create(&tid3, &attr, ThreadC, (void *)(&params)) != 0)
   {
-	  perror("Error creating threads: ");
-      exit(-1);
+    perror("Error creating threads: ");
+    exit(-1);
   }
   //TODO: add your code
-
 
   // Wait on threads to finish
   pthread_join(tid1, NULL);
@@ -97,7 +101,8 @@ if(pthread_create(&tid3, &attr, ThreadC, (void*)(&params))!=0)
   return 0;
 }
 
-void initializeData(ThreadParams *params) {
+void initializeData(ThreadParams *params)
+{
   // Initialize Sempahores
   sem_init(&(params->sem_read), 0, 1);
 
@@ -106,20 +111,23 @@ void initializeData(ThreadParams *params) {
   return;
 }
 
-void *ThreadA(void *params) {
+void *ThreadA(void *params)
+{
   //TODO: add your code
 
-printf("ThreadA\n");
+  printf("ThreadA\n");
 }
 
-void *ThreadB(void *params) {
+void *ThreadB(void *params)
+{
   //TODO: add your code
 
- printf("ThreadB\n");
+  printf("ThreadB\n");
 }
 
-void *ThreadC(void *params) {
+void *ThreadC(void *params)
+{
   //TODO: add your code
 
-printf("ThreadC\n");
+  printf("ThreadC\n");
 }
