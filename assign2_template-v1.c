@@ -33,6 +33,9 @@ typedef struct ThreadParams
   sem_t sem_read, sem_justify, sem_write;
   char message[255];
   pthread_mutex_t lock;
+
+  char read_file[100], write_file[100];
+
 } ThreadParams;
 
 /* --- Prototypes --- */
@@ -60,6 +63,13 @@ int main(int argc, char const *argv[])
   pthread_t tid1, tid2, tid3; //Thread ID
   pthread_attr_t attr;
   ThreadParams params;
+
+  //Define file names?
+
+  //Write to Params
+  params.pipeFile = fd;
+  params.read_file = "data.txt";
+  params.write_file = "output.txt";
 
   // Initialization
   initializeData(&params);
@@ -92,6 +102,8 @@ int main(int argc, char const *argv[])
   }
   //TODO: add your code
 
+
+
   // Wait on threads to finish
   pthread_join(tid1, NULL);
   pthread_join(tid2, NULL);
@@ -105,8 +117,11 @@ void initializeData(ThreadParams *params)
 {
   // Initialize Sempahores
   sem_init(&(params->sem_read), 0, 1);
+  sem_init(&(params->sem_justify), 0, 1);
+  sem_init(&(params->sem_write), 0, 1);
 
   //TODO: add your code
+  params->pipeFile = 
 
   return;
 }
@@ -114,6 +129,20 @@ void initializeData(ThreadParams *params)
 void *ThreadA(void *params)
 {
   //TODO: add your code
+  char line[255];
+
+  //Open File
+
+  FILE* fptr = fopen(params->read_file,"r");
+
+  //Read One Line
+
+  fgets(line, sizeof(line), fptr); //Reads one line
+
+  //Write to Pipe
+  write(params->fd[1], line, strlen(line) + 1);
+
+  fclose(fptr);
 
   printf("ThreadA\n");
 }
