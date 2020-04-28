@@ -149,14 +149,32 @@ void *ThreadA(void *params)
 
 void *ThreadB(void *params)
 {
-  //TODO: add your code
+  ThreadParams *parameters = params;
+
+  while(!sem_wait(&sem_justify))
+  {
+    read()
+    sem_post(&sem_write);
+  }
+
+  close()
 
   printf("ThreadB\n");
 }
 
 void *ThreadC(void *params)
 {
-  //TODO: add your code
+  ThreadParams *parameters = params;
+  FILE* writeFile = fopen(parameters->filename, "w");
+  if(!writeFile)
+  {
+      perror("Invalid File");
+      exit(0);
+  }
+
+    
+
+
 
   printf("ThreadC\n");
 }
