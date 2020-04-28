@@ -114,6 +114,39 @@ void *ThreadA(void *params)
   /* note: Since the data_stract is declared as pointer. the A_thread_params->message */
   ThreadParams *A_thread_params = (ThreadParams *)(params);
 
+  FILE *fptr;
+  char file_name[100] = "data.txt";
+  int sig;
+  char check[12] = "end_header\n";
+
+  if ((fptr = fopen(file_name, "r")) == NULL)
+  {
+    printf("Error! opening file");
+    // Program exits if file pointer returns NULL.
+    exit(1);
+  }
+
+  printf("reading from the file: \n");
+
+  sig = 0;
+
+  while(fgets(A_thread_params->message, sizeof(A_thread_params->message), fptr) != NULL)
+  {
+
+    if(sig == 1)
+    {
+      write(A_thread_params->pipeFile[1], A_thread_params->message, 1);
+    }
+
+    //Read until end of header
+    if((sig == 0) && strcmp(A_thread_params->message, check) == 0)
+    {
+      sig = 1; //Flags end of header
+    }
+  }
+
+  fclose(fptr);
+
   printf("ThreadA\n");
 }
 
