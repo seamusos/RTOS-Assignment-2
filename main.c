@@ -27,6 +27,10 @@
 #include <semaphore.h>
 #include <sys/time.h>
 
+/* --- Global Definitions --- */
+
+#define END_OF_HEADER "end_header"
+
 /* --- Structs --- */
 
 typedef struct ThreadParams
@@ -159,16 +163,27 @@ void *ThreadB(void *params)
 
   ThreadParams *B_thread_params = (ThreadParams *)(params);
 
-  sem_wait(&(B_thread_params->sem_B_to_A)); //Wait for semaphore
+  while(!sem_wait(&(B_thread_params->sem_B_to_A)))
+  {
+      read(B_thread_params->pipeFile[2], <<<<>>>>, sizeof(B_thread_params->message)); // Read from the pipe
+      sem_post(&B_thread_params->sem_C_to_A);
+  }
 
-  
   printf("ThreadB\n");
 }
 
 void *ThreadC(void *params)
 {
   ThreadParams *C_thread_params = (ThreadParams *)(params);
+  FILE* writeFile = fopen(C_thread_params->write_file, "w");
+  if(!writeFile)
+  {
+      perror("Invalid File");
+      exit(0);
+  }
 
+  char line[sizeof(C_thread_params->message)];
+  
   sem_wait(&(C_thread_params->sem_B_to_A)); //Wait for semaphore
 
   char check[12] = "end_header\n";
