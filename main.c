@@ -66,8 +66,8 @@ int main(int argc, char const *argv[])
 
   ThreadParams params;
 
-  params.read_file = "data.txt";
-  params.write_file = "output.txt";
+  strcpy(params.read_file, "data.txt");
+  strcpy(params.write_file, "output.txt");
 
   // Initialization
   initializeData(&params);
@@ -131,7 +131,6 @@ void *ThreadA(void *params)
   sem_wait(&(A_thread_params->sem_read)); //Wait for semaphore
 
   FILE *fptr; //File pointer for Read File
-  int success;
 
   if ((fptr = fopen(A_thread_params->read_file, "r")) == NULL)
   {
@@ -164,7 +163,7 @@ void *ThreadB(void *params)
 
   while(!sem_wait(&(B_thread_params->sem_justify)))
   {
-      read(B_thread_params->pipeFile[2], B_thread_params->message, sizeof(B_thread_params->message)); // Read from the pipe
+      read(B_thread_params->pipeFile[1], B_thread_params->message, sizeof(B_thread_params->message)); // Read from the pipe
       sem_post(&B_thread_params->sem_write);
   }
 
@@ -182,7 +181,7 @@ void *ThreadC(void *params)
       exit(0);
   }
   
-  while(!sem_wait(C_thread_params->sem_write))
+  while(!sem_wait(&C_thread_params->sem_write))
     {
 
     char check[12] = "end_header\n";
@@ -198,8 +197,7 @@ void *ThreadC(void *params)
       content = 1; //Flags end of header
     }
 
-    sem_post(C_thread_params->sem_read);
-
+    sem_post(&C_thread_params->sem_read);
     }
 
   fclose(writeFile); // Close FILE*
