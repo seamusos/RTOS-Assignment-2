@@ -129,7 +129,7 @@ void *ThreadA(void *params)
 
   FILE *fptr; //File pointer for Read File
   char file_name[100] = "data.txt";
-  int sig;
+  int sig, success;
   char check[12] = "end_header\n";
 
   if ((fptr = fopen(file_name, "r")) == NULL)
@@ -148,7 +148,11 @@ void *ThreadA(void *params)
 
     if(sig == 1)
     {
-      write(A_thread_params->pipeFile[1], A_thread_params->message, 1);
+      if(write(A_thread_params->pipeFile[1], A_thread_params->message, 1) != 1)
+      {
+        perror("write");
+        exit(2);
+      }
     }
 
     //Read until end of header
