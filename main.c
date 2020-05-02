@@ -141,24 +141,12 @@ void *ThreadA(void *params)
 
   printf("reading from the file: \n");
 
-  sig = 0;  //Flag for end of header file
-
   while(fgets(A_thread_params->message, sizeof(A_thread_params->message), fptr) != NULL)
   {
-
-    if(sig == 1)
+    if(write(A_thread_params->pipeFile[1], A_thread_params->message, 1) != 1)
     {
-      if(write(A_thread_params->pipeFile[1], A_thread_params->message, 1) != 1)
-      {
-        perror("write");
-        exit(2);
-      }
-    }
-
-    //Read until end of header
-    if((sig == 0) && strcmp(A_thread_params->message, check) == 0)
-    {
-      sig = 1; //Flags end of header
+      perror("write");
+      exit(2);
     }
   }
 
@@ -180,6 +168,18 @@ void *ThreadC(void *params)
 {
   //TODO: add your code
   ThreadParams *C_thread_params = (ThreadParams *)(params);
+
+
+
+  sig = 0;  //Flag for end of header file
+
+  //Read until end of header
+  if((sig == 0) && strcmp(A_thread_params->message, check) == 0)
+  {
+    sig = 1; //Flags end of header
+  }
+
+
 
   printf("ThreadC\n");
 }
