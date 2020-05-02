@@ -4,6 +4,10 @@
 // This is a template for the subject of RTOS in University of Technology Sydney(UTS)
 // Please complete the code based on the assignment requirement.
 
+//Group Members:
+//  Seamus O'Sullivan     12045959
+//  Alastair Bate         12585826
+
 //***********************************************************************************
 /***********************************************************************************/
 
@@ -30,6 +34,7 @@ typedef struct ThreadParams
   int pipeFile[2];
   sem_t sem_A_to_B, sem_B_to_A, sem_C_to_A;
   char message[255];
+  char read_file[100], write_file[100];
 
 } ThreadParams;
 
@@ -56,6 +61,9 @@ int main(int argc, char const *argv[])
   pthread_attr_t attr;
 
   ThreadParams params;
+
+  params.read_file = "data.txt";
+  params.write_file = "output.txt";
 
   // Initialization
   initializeData(&params);
@@ -100,7 +108,10 @@ int main(int argc, char const *argv[])
 void initializeData(ThreadParams *params)
 {
   // Initialize Sempahores
-  sem_init(&(params->sem_A_to_B), 0, 1);
+  //Priorities?
+  sem_init(&(params->sem_A_to_B), 0, 1);  //Semaphore = 1
+  sem_init(&(params->sem_B_to_A), 0, 0);
+  sem_init(&(params->sem_C_to_A), 0, 0);
 
   //TODO: add your code
 
@@ -114,7 +125,9 @@ void *ThreadA(void *params)
   /* note: Since the data_stract is declared as pointer. the A_thread_params->message */
   ThreadParams *A_thread_params = (ThreadParams *)(params);
 
-  FILE *fptr;
+  sem_wait(&(A_thread_params->sem_A_to_B)); //Wait for semaphore
+
+  FILE *fptr; //File pointer for Read File
   char file_name[100] = "data.txt";
   int sig;
   char check[12] = "end_header\n";
@@ -128,7 +141,7 @@ void *ThreadA(void *params)
 
   printf("reading from the file: \n");
 
-  sig = 0;
+  sig = 0;  //Flag for end of header file
 
   while(fgets(A_thread_params->message, sizeof(A_thread_params->message), fptr) != NULL)
   {
@@ -145,8 +158,9 @@ void *ThreadA(void *params)
     }
   }
 
-  fclose(fptr);
-
+  fclose(fptr); //Close File pointer
+  
+  sem_post(&(A_thread_params->sem_B_to_A)); //Flag thread B semaphore
   printf("ThreadA\n");
 }
 
