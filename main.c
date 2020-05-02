@@ -1,7 +1,9 @@
 /***********************************************************************************/
 //***********************************************************************************
 //            *************NOTE**************
-//                 RTOS UTS Assignment 2
+// This is a template for the subject of RTOS in University of Technology Sydney(UTS)
+// Please complete the code based on the assignment requirement.
+
 //Group Members:
 //  Seamus O'Sullivan     12045959
 //  Alastair Bate         12585826
@@ -25,6 +27,10 @@
 #include <semaphore.h>
 #include <sys/time.h>
 
+/* --- Global Definitions --- */
+
+#define END_OF_HEADER "end_header"
+
 /* --- Structs --- */
 
 typedef struct ThreadParams
@@ -32,8 +38,6 @@ typedef struct ThreadParams
   int pipeFile[2];
   sem_t sem_read, sem_justify, sem_write;
   char message[255];
-  pthread_mutex_t lock;
-
   char read_file[100], write_file[100];
 
 } ThreadParams;
@@ -55,19 +59,13 @@ void *ThreadC(void *params);
 /* --- Main Code --- */
 int main(int argc, char const *argv[])
 {
-  struct timeval t1;
-  gettimeofday(&t1, NULL); // Start Timer
-  int fd[2];               //File descriptor for creating a pipe
 
   int result;
   pthread_t tid1, tid2, tid3; //Thread ID
   pthread_attr_t attr;
+
   ThreadParams params;
 
-  //Define file names?
-
-  //Write to Params
-  params.pipeFile = fd;
   params.read_file = "data.txt";
   params.write_file = "output.txt";
 
@@ -76,7 +74,7 @@ int main(int argc, char const *argv[])
   pthread_attr_init(&attr);
 
   // Create pipe
-  result = pipe(fd);
+  result = pipe(params.pipeFile);
   if (result < 0)
   {
     perror("pipe error");
@@ -102,8 +100,6 @@ int main(int argc, char const *argv[])
   }
   //TODO: add your code
 
-
-
   // Wait on threads to finish
   pthread_join(tid1, NULL);
   pthread_join(tid2, NULL);
@@ -128,52 +124,84 @@ void initializeData(ThreadParams *params)
 void *ThreadA(void *params)
 {
   //TODO: add your code
-  char line[255];
 
-  //Open File
+  /* note: Since the data_stract is declared as pointer. the A_thread_params->message */
+  ThreadParams *A_thread_params = (ThreadParams *)(params);
 
-  FILE* fptr = fopen(params->read_file,"r");
+  sem_wait(&(A_thread_params->sem_read)); //Wait for semaphore
 
-  //Read One Line
+  FILE *fptr; //File pointer for Read File
+  int success;
 
-  fgets(line, sizeof(line), fptr); //Reads one line
+  if ((fptr = fopen(A_thread_params->read_file, "r")) == NULL)
+  {
+    printf("Error! opening file");
+    // Program exits if file pointer returns NULL.
+    exit(1);
+  }
 
-  //Write to Pipe
-  write(params->fd[1], line, strlen(line) + 1);
+  printf("reading from the file: \n");
 
-  fclose(fptr);
+  while(fgets(A_thread_params->message, sizeof(A_thread_params->message), fptr) != NULL)
+  {
+    if(write(A_thread_params->pipeFile[1], A_thread_params->message, 1) != 1)
+    {
+      perror("write");
+      exit(2);
+    }
+  }
 
+  fclose(fptr); //Close File pointer
+  
+  sem_post(&(A_thread_params->sem_justify)); //Flag thread B semaphore
   printf("ThreadA\n");
 }
 
 void *ThreadB(void *params)
 {
-  ThreadParams *parameters = params;
 
-  while(!sem_wait(&sem_justify))
+  ThreadParams *B_thread_params = (ThreadParams *)(params);
+
+  while(!sem_wait(&(B_thread_params->sem_justify)))
   {
-    read()
-    sem_post(&sem_write);
+      read(B_thread_params->pipeFile[2], B_thread_params->message, sizeof(B_thread_params->message)); // Read from the pipe
+      sem_post(&B_thread_params->sem_write);
   }
-
-  close()
 
   printf("ThreadB\n");
 }
 
 void *ThreadC(void *params)
 {
-  ThreadParams *parameters = params;
-  FILE* writeFile = fopen(parameters->filename, "w");
+  ThreadParams *C_thread_params = (ThreadParams *)(params);
+  // Open the file in which the content will be written to
+  FILE* writeFile = fopen(C_thread_params->write_file, "w");
   if(!writeFile)
   {
       perror("Invalid File");
       exit(0);
   }
+  
+  while(!sem_wait(C_thread_params->sem_write))
+    {
 
-    
+    char check[12] = "end_header\n";
+    int content = 0;  //Flag for end of header file
 
+    // Only write content if it's not apart of the header
+    if (content)
+    {
+      fputs(C_thread_params->message, writeFile);
+    }
+    else if(strcmp(C_thread_params->message, check) == 0)   // check if content is apart of the header
+    {
+      content = 1; //Flags end of header
+    }
 
+    sem_post(C_thread_params->sem_read);
 
+    }
+
+  fclose(writeFile); // Close FILE*
   printf("ThreadC\n");
 }
