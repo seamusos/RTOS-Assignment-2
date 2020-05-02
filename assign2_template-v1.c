@@ -121,7 +121,6 @@ void initializeData(ThreadParams *params)
   sem_init(&(params->sem_write), 0, 1);
 
   //TODO: add your code
-  params->pipeFile = 
 
   return;
 }
