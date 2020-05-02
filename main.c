@@ -130,7 +130,7 @@ void *ThreadA(void *params)
   FILE *fptr; //File pointer for Read File
   char file_name[100] = "data.txt";
   int sig, success;
-  char check[12] = "end_header\n";
+
 
   if ((fptr = fopen(file_name, "r")) == NULL)
   {
@@ -169,17 +169,24 @@ void *ThreadC(void *params)
   //TODO: add your code
   ThreadParams *C_thread_params = (ThreadParams *)(params);
 
+  sem_wait(&(C_thread_params->sem_C_to_A));
+
+  char check[12] = "end_header\n";
+
+  FILE* fptr;
+
+
 
 
   sig = 0;  //Flag for end of header file
 
   //Read until end of header
-  if((sig == 0) && strcmp(A_thread_params->message, check) == 0)
+  if((sig == 0) && strcmp(C_thread_params->message, check) == 0)
   {
     sig = 1; //Flags end of header
   }
 
 
-
+  sem_post();
   printf("ThreadC\n");
 }
