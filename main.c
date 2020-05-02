@@ -128,11 +128,9 @@ void *ThreadA(void *params)
   sem_wait(&(A_thread_params->sem_A_to_B)); //Wait for semaphore
 
   FILE *fptr; //File pointer for Read File
-  char file_name[100] = "data.txt";
-  int sig, success;
-  char check[12] = "end_header\n";
+  int success;
 
-  if ((fptr = fopen(file_name, "r")) == NULL)
+  if ((fptr = fopen(A_thread_params->read_file, "r")) == NULL)
   {
     printf("Error! opening file");
     // Program exits if file pointer returns NULL.
@@ -158,23 +156,26 @@ void *ThreadA(void *params)
 
 void *ThreadB(void *params)
 {
-  //TODO: add your code
 
   ThreadParams *B_thread_params = (ThreadParams *)(params);
+
+  sem_wait(&(B_thread_params->sem_B_to_A)); //Wait for semaphore
+
+  
   printf("ThreadB\n");
 }
 
 void *ThreadC(void *params)
 {
-  //TODO: add your code
   ThreadParams *C_thread_params = (ThreadParams *)(params);
 
+  sem_wait(&(C_thread_params->sem_B_to_A)); //Wait for semaphore
 
-
-  sig = 0;  //Flag for end of header file
+  char check[12] = "end_header\n";
+  int sig = 0;  //Flag for end of header file
 
   //Read until end of header
-  if((sig == 0) && strcmp(A_thread_params->message, check) == 0)
+  if((sig == 0) && strcmp(C_thread_params->message, check) == 0)
   {
     sig = 1; //Flags end of header
   }
