@@ -165,7 +165,7 @@ void *ThreadB(void *params)
 
   while(!sem_wait(&(B_thread_params->sem_B_to_A)))
   {
-      read(B_thread_params->pipeFile[2], <<<<>>>>, sizeof(B_thread_params->message)); // Read from the pipe
+      read(B_thread_params->pipeFile[1], "<<<<>>>>", sizeof(B_thread_params->message)); // Read from the pipe
       sem_post(&B_thread_params->sem_C_to_A);
   }
 
@@ -175,27 +175,29 @@ void *ThreadB(void *params)
 void *ThreadC(void *params)
 {
   ThreadParams *C_thread_params = (ThreadParams *)(params);
+  // Open the file in which the content will be written to
   FILE* writeFile = fopen(C_thread_params->write_file, "w");
   if(!writeFile)
   {
       perror("Invalid File");
       exit(0);
   }
-
-  char line[sizeof(C_thread_params->message)];
   
   sem_wait(&(C_thread_params->sem_B_to_A)); //Wait for semaphore
 
   char check[12] = "end_header\n";
-  int sig = 0;  //Flag for end of header file
+  int content = 0;  //Flag for end of header file
 
-  //Read until end of header
-  if((sig == 0) && strcmp(C_thread_params->message, check) == 0)
+  // Only write content if it's not apart of the header
+  if (content)
   {
-    sig = 1; //Flags end of header
+    fputs("<<<<<>>>>>>", writeFile);
+  }
+  else if(strcmp("<<<<<>>>>>>", check) == 0)   // check if content is apart of the header
+  {
+    content = 1; //Flags end of header
   }
 
-
-
+  fclose(writeFile); // Close FILE*
   printf("ThreadC\n");
 }
