@@ -123,8 +123,6 @@ void initializeData(ThreadParams *params)
 
 void *ThreadA(void *params)
 {
-  //TODO: add your code
-
   /* note: Since the data_stract is declared as pointer. the A_thread_params->message */
   ThreadParams *A_thread_params = (ThreadParams *)(params);
 
