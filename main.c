@@ -27,12 +27,16 @@
 #include <semaphore.h>
 #include <sys/time.h>
 
+/* --- Global Definitions --- */
+
+#define END_OF_HEADER "end_header"
+
 /* --- Structs --- */
 
 typedef struct ThreadParams
 {
   int pipeFile[2];
-  sem_t sem_A_to_B, sem_B_to_A, sem_C_to_A;
+  sem_t sem_read, sem_justify, sem_write;
   char message[255];
   char read_file[100], write_file[100];
 
@@ -62,8 +66,8 @@ int main(int argc, char const *argv[])
 
   ThreadParams params;
 
-  params.read_file = "data.txt";
-  params.write_file = "output.txt";
+  strcpy(params.read_file, "data.txt");
+  strcpy(params.write_file, "output.txt");
 
   // Initialization
   initializeData(&params);
@@ -108,10 +112,9 @@ int main(int argc, char const *argv[])
 void initializeData(ThreadParams *params)
 {
   // Initialize Sempahores
-  //Priorities?
-  sem_init(&(params->sem_A_to_B), 0, 1);  //Semaphore = 1
-  sem_init(&(params->sem_B_to_A), 0, 0);
-  sem_init(&(params->sem_C_to_A), 0, 0);
+  sem_init(&(params->sem_read), 0, 1);
+  sem_init(&(params->sem_justify), 0, 1);
+  sem_init(&(params->sem_write), 0, 1);
 
   //TODO: add your code
 
@@ -120,19 +123,14 @@ void initializeData(ThreadParams *params)
 
 void *ThreadA(void *params)
 {
-  //TODO: add your code
-
   /* note: Since the data_stract is declared as pointer. the A_thread_params->message */
   ThreadParams *A_thread_params = (ThreadParams *)(params);
 
-  sem_wait(&(A_thread_params->sem_A_to_B)); //Wait for semaphore
+  sem_wait(&(A_thread_params->sem_read)); //Wait for semaphore
 
   FILE *fptr; //File pointer for Read File
-  char file_name[100] = "data.txt";
-  int sig, success;
 
-
-  if ((fptr = fopen(file_name, "r")) == NULL)
+  if ((fptr = fopen(A_thread_params->read_file, "r")) == NULL)
   {
     printf("Error! opening file");
     // Program exits if file pointer returns NULL.
@@ -152,41 +150,54 @@ void *ThreadA(void *params)
 
   fclose(fptr); //Close File pointer
   
-  sem_post(&(A_thread_params->sem_B_to_A)); //Flag thread B semaphore
+  sem_post(&(A_thread_params->sem_justify)); //Flag thread B semaphore
   printf("ThreadA\n");
 }
 
 void *ThreadB(void *params)
 {
-  //TODO: add your code
 
   ThreadParams *B_thread_params = (ThreadParams *)(params);
+
+  while(!sem_wait(&(B_thread_params->sem_justify)))
+  {
+      read(B_thread_params->pipeFile[1], B_thread_params->message, sizeof(B_thread_params->message)); // Read from the pipe
+      sem_post(&B_thread_params->sem_write);
+  }
+
   printf("ThreadB\n");
 }
 
 void *ThreadC(void *params)
 {
-  //TODO: add your code
   ThreadParams *C_thread_params = (ThreadParams *)(params);
-
-  sem_wait(&(C_thread_params->sem_C_to_A));
-
-  char check[12] = "end_header\n";
-
-  FILE* fptr;
-
-
-
-
-  sig = 0;  //Flag for end of header file
-
-  //Read until end of header
-  if((sig == 0) && strcmp(C_thread_params->message, check) == 0)
+  // Open the file in which the content will be written to
+  FILE* writeFile = fopen(C_thread_params->write_file, "w");
+  if(!writeFile)
   {
-    sig = 1; //Flags end of header
+      perror("Invalid File");
+      exit(0);
   }
+  
+  while(!sem_wait(&C_thread_params->sem_write))
+    {
 
+    char check[12] = "end_header\n";
+    int content = 0;  //Flag for end of header file
 
-  sem_post();
+    // Only write content if it's not apart of the header
+    if (content)
+    {
+      fputs(C_thread_params->message, writeFile);
+    }
+    else if(strcmp(C_thread_params->message, check) == 0)   // check if content is apart of the header
+    {
+      content = 1; //Flags end of header
+    }
+
+    sem_post(&C_thread_params->sem_read);
+    }
+
+  fclose(writeFile); // Close FILE*
   printf("ThreadC\n");
 }
