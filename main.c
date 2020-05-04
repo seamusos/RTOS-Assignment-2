@@ -13,7 +13,7 @@
 
 /*
   To compile prog_1 ensure that gcc is installed and run the following command:
-  gcc prog_1.c -o prog_1 -lpthread -lrt
+  gcc main.c -o main -lpthread -lrt
 
 */
 #include <pthread.h>
