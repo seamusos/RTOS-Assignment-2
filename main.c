@@ -117,7 +117,7 @@ void initializeData(ThreadParams *params)
 
 
   printf("This program will by default, take a file called data.txt and read it's content, it will then only print the content of the file to the file output.txt\n");
-  printf("if you wish to provide an alternate input file name, please do so in the form __________\n\n\n");
+  printf("If you wish to provide an alternate input file name, please do so in the form __________\n\n\n");
 
   printf("Please be aware this file will overwrite any existing output.txt files that exist, control c to exit, else please press the enter key to continue \n");
   while (getchar() != '\n');
@@ -149,7 +149,7 @@ void *ThreadA(void *params)
     // Program exits if file pointer returns NULL.
     exit(1);
   }
-  printf("reading from your file: %s\n",A_thread_params->read_file);
+  printf("Reading from your file: %s\n",A_thread_params->read_file);
 
   while (fgets(buffer, sizeof(buffer), fptr) != NULL) //cycle through all lines of the file until complete
   {
@@ -192,7 +192,7 @@ void *ThreadC(void *params)
   //declare local variables
   ThreadParams *C_thread_params = (ThreadParams *)(params);
   // Open the file in which the content will be written to
-  printf("opening your write file\n");
+  printf("Opening your write file\n");
   FILE* writeFile = fopen(C_thread_params->write_file, "w");
   if (!writeFile)
   {
@@ -200,14 +200,14 @@ void *ThreadC(void *params)
     exit(0);
   }
   
-  printf("your output file will now be printed\n\n");
+  printf("Your output file will now be printed\n\n");
   int content = 0; //Flag for end of header file
   while(!sem_wait(&(C_thread_params->sem_C_to_A)))
   {
     // Only write content if it's not apart of the header
     if (content)
     {
-      printf("printing line to file: %s\n",C_thread_params->message);
+      printf("Printing line to file: %s\n",C_thread_params->message);
       fputs(C_thread_params->message, writeFile);
     }
     else if (strcmp(C_thread_params->message, END_OF_HEADER) == 0) // check if content is apart of the header
@@ -218,6 +218,6 @@ void *ThreadC(void *params)
     sem_post(&C_thread_params->sem_A_to_B);
   }
 
-  printf("your file has been written with your data\n");
+  printf("Your file has been written with your data\n");
   fclose(writeFile); // Close FILE*
 }
