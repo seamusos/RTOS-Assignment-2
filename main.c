@@ -110,6 +110,7 @@ int main(int argc, char const *argv[])
 
 void initializeData(ThreadParams *params)
 {
+  printf("welcome to the RTOS file converter, my name is clippy and I are here to provide all your file copy needs\n");
   // Initialize Sempahores
   sem_init(&(params->sem_A_to_B), 0, 1);
   sem_init(&(params->sem_B_to_C), 0, 0);
@@ -123,16 +124,16 @@ void *ThreadA(void *params)
   /* note: Since the data_stract is declared as pointer. the A_thread_params->message */
   ThreadParams *A_thread_params = (ThreadParams *)(params);
   char buffer[BUFFER_SIZE];
-
+  printf("Opening your file to read\n");
   FILE *fptr; //File pointer for Read File
   
   if ((fptr = fopen(A_thread_params->read_file, "r")) == NULL)
   {
-    printf("Error! opening file");
+    printf("Error! opening file\n");
     // Program exits if file pointer returns NULL.
     exit(1);
   }
-  printf("reading from the file: %s\n",A_thread_params->read_file);
+  printf("reading from your file: %s\n",A_thread_params->read_file);
 
   while (fgets(buffer, sizeof(buffer), fptr) != NULL)
   {
@@ -142,6 +143,7 @@ void *ThreadA(void *params)
     sem_post(&(A_thread_params->sem_B_to_C)); //Flag thread B semaphore
   }
 
+  
   fclose(fptr); //Close File pointer
   exit(0);
 
@@ -168,13 +170,15 @@ void *ThreadC(void *params)
 {
   ThreadParams *C_thread_params = (ThreadParams *)(params);
   // Open the file in which the content will be written to
+  printf("opening your write file\n");
   FILE* writeFile = fopen(C_thread_params->write_file, "w");
   if (!writeFile)
   {
-    perror("Invalid File");
+    perror("Invalid File\n");
     exit(0);
   }
 
+  printf("your output file will now be printed\n");
   int content = 0; //Flag for end of header file
   while(!sem_wait(&(C_thread_params->sem_C_to_A)))
   {
