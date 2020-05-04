@@ -132,7 +132,7 @@ void *ThreadA(void *params)
     // Program exits if file pointer returns NULL.
     exit(1);
   }
-  printf("reading from the file: \n");
+  printf("reading from the file: %s\n",A_thread_params->read_file);
 
   while (fgets(buffer, sizeof(buffer), fptr) != NULL)
   {
