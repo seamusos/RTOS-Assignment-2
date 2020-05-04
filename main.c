@@ -57,6 +57,9 @@ void *ThreadB(void *params);
 /* This thread reads from shared variable and outputs non-header text to src.txt */
 void *ThreadC(void *params);
 
+/* This function allows the welcome messages to pbe printed and updated as necessary */
+void Welcome();
+
 /* --- Main Code --- */
 int main(int argc, char const *argv[])
 {
@@ -110,21 +113,6 @@ int main(int argc, char const *argv[])
 
 void initializeData(ThreadParams *params)
 {
-  printf(" _________\n< welcome >\n _________\n \\\n  \\\n     __\n    /  \\\n    |  |\n    @  @\n    |  |\n    || |/\n    || ||\n    |\\_/|\n    \\___/\n\n\n");
-
-
-  printf("Welcome to the RTOS file converter, my name is clippy and I are here to provide all your file copy needs\n\n\n");
-
-
-  printf("This program will by default, take a file called data.txt and read it's content, it will then only print the content of the file to the file output.txt\n");
-  printf("If you wish to provide an alternate input file name, please do so in the form __________\n\n\n");
-
-  printf("Please be aware this file will overwrite any existing output.txt files that exist, control c to exit, else please press the enter key to continue \n");
-  while (getchar() != '\n');
-
-
-  
-
   // Initialize Sempahores
   sem_init(&(params->sem_A_to_B), 0, 1);
   sem_init(&(params->sem_B_to_C), 0, 0);
@@ -135,6 +123,7 @@ void initializeData(ThreadParams *params)
 
 void *ThreadA(void *params)
 {
+  Welcome();
   //declare local variables
   ThreadParams *A_thread_params = (ThreadParams *)(params);
   char buffer[BUFFER_SIZE]; // temporary variable to store the text from the file
@@ -220,4 +209,18 @@ void *ThreadC(void *params)
 
   printf("Your file has been written with your data\n");
   fclose(writeFile); // Close FILE*
+}
+
+void Welcome()
+{
+  printf(" _________\n< welcome >\n _________\n \\\n  \\\n     __\n    /  \\\n    |  |\n    @  @\n    |  |\n    || |/\n    || ||\n    |\\_/|\n    \\___/\n\n\n");
+
+  printf("Welcome to the RTOS file converter, my name is clippy and I are here to provide all your file copy needs\n\n\n");
+
+
+  printf("This program will by default, take a file called data.txt and read it's content, it will then only print the content of the file to the file output.txt\n");
+  printf("If you wish to provide an alternate input file name, please do so in the form __________\n\n\n");
+
+  printf("Please be aware this file will overwrite any existing output.txt files that exist, control c to exit, else please press the enter key to continue \n");
+  while (getchar() != '\n');
 }
