@@ -29,7 +29,8 @@
 
 /* --- Global Definitions --- */
 
-#define END_OF_HEADER "end_header"
+#define END_OF_HEADER "end_header\n"
+#define BUFFER_SIZE 255
 
 /* --- Structs --- */
 
@@ -125,6 +126,7 @@ void *ThreadA(void *params)
 {
   /* note: Since the data_stract is declared as pointer. the A_thread_params->message */
   ThreadParams *A_thread_params = (ThreadParams *)(params);
+  char buffer[BUFFER_SIZE];
 
   sem_wait(&(A_thread_params->sem_read)); //Wait for semaphore
 
@@ -139,9 +141,9 @@ void *ThreadA(void *params)
 
   printf("reading from the file: \n");
 
-  while(fgets(A_thread_params->message, sizeof(A_thread_params->message), fptr) != NULL)
+  while (fgets(buffer, sizeof(buffer), fptr) != NULL)
   {
-    if(write(A_thread_params->pipeFile[1], A_thread_params->message, 1) != 1)
+    if (write(A_thread_params->pipeFile[1], buffer, 1) != 1) //Write to pipe 
     {
       perror("write");
       exit(2);
@@ -149,7 +151,7 @@ void *ThreadA(void *params)
   }
 
   fclose(fptr); //Close File pointer
-  
+
   sem_post(&(A_thread_params->sem_justify)); //Flag thread B semaphore
   printf("ThreadA\n");
 }
@@ -159,10 +161,10 @@ void *ThreadB(void *params)
 
   ThreadParams *B_thread_params = (ThreadParams *)(params);
 
-  while(!sem_wait(&(B_thread_params->sem_justify)))
+  while (!sem_wait(&(B_thread_params->sem_justify)))
   {
-      read(B_thread_params->pipeFile[1], B_thread_params->message, sizeof(B_thread_params->message)); // Read from the pipe
-      sem_post(&B_thread_params->sem_write);
+    read(B_thread_params->pipeFile[1], B_thread_params->message, sizeof(B_thread_params->message)); // Read from the pipe
+    sem_post(&B_thread_params->sem_write);
   }
 
   printf("ThreadB\n");
@@ -173,30 +175,30 @@ void *ThreadC(void *params)
   ThreadParams *C_thread_params = (ThreadParams *)(params);
   // Open the file in which the content will be written to
   FILE* writeFile = fopen(C_thread_params->write_file, "w");
-  if(!writeFile)
+  if (!writeFile)
   {
-      perror("Invalid File");
-      exit(0);
+    perror("Invalid File");
+    exit(0);
   }
-  
-  while(!sem_wait(&C_thread_params->sem_write))
-    {
 
-    char check[12] = "end_header\n";
-    int content = 0;  //Flag for end of header file
+  while (!sem_wait(&C_thread_params->sem_write))
+  {
+
+    //char check[12] = "end_header\n";
+    int content = 0; //Flag for end of header file
 
     // Only write content if it's not apart of the header
     if (content)
     {
       fputs(C_thread_params->message, writeFile);
     }
-    else if(strcmp(C_thread_params->message, check) == 0)   // check if content is apart of the header
+    else if (strcmp(C_thread_params->message, END_OF_HEADER) == 0) // check if content is apart of the header
     {
       content = 1; //Flags end of header
     }
 
     sem_post(&C_thread_params->sem_read);
-    }
+  }
 
   fclose(writeFile); // Close FILE*
   printf("ThreadC\n");
