@@ -29,14 +29,15 @@
 
 /* --- Global Definitions --- */
 
-#define END_OF_HEADER "end_header"
+#define END_OF_HEADER "end_header\n"
+#define BUFFER_SIZE 255
 
 /* --- Structs --- */
 
 typedef struct ThreadParams
 {
   int pipeFile[2];
-  sem_t sem_read, sem_justify, sem_write;
+  sem_t sem_A_to_B, sem_B_to_C, sem_C_to_A;
   char message[255];
   char read_file[100], write_file[100];
 
@@ -98,13 +99,11 @@ int main(int argc, char const *argv[])
     perror("Error creating threads: ");
     exit(-1);
   }
-  //TODO: add your code
 
   // Wait on threads to finish
   pthread_join(tid1, NULL);
   pthread_join(tid2, NULL);
   pthread_join(tid3, NULL);
-  //TODO: add your code
 
   return 0;
 }
@@ -112,11 +111,9 @@ int main(int argc, char const *argv[])
 void initializeData(ThreadParams *params)
 {
   // Initialize Sempahores
-  sem_init(&(params->sem_read), 0, 1);
-  sem_init(&(params->sem_justify), 0, 1);
-  sem_init(&(params->sem_write), 0, 1);
-
-  //TODO: add your code
+  sem_init(&(params->sem_A_to_B), 0, 1);
+  sem_init(&(params->sem_B_to_C), 0, 0);
+  sem_init(&(params->sem_C_to_A), 0, 0);
 
   return;
 }
@@ -125,78 +122,79 @@ void *ThreadA(void *params)
 {
   /* note: Since the data_stract is declared as pointer. the A_thread_params->message */
   ThreadParams *A_thread_params = (ThreadParams *)(params);
-
-  sem_wait(&(A_thread_params->sem_read)); //Wait for semaphore
+  char buffer[BUFFER_SIZE];
 
   FILE *fptr; //File pointer for Read File
-
+  
   if ((fptr = fopen(A_thread_params->read_file, "r")) == NULL)
   {
     printf("Error! opening file");
     // Program exits if file pointer returns NULL.
     exit(1);
   }
-
   printf("reading from the file: \n");
 
-  while(fgets(A_thread_params->message, sizeof(A_thread_params->message), fptr) != NULL)
+  while (fgets(buffer, sizeof(buffer), fptr) != NULL)
   {
-    if(write(A_thread_params->pipeFile[1], A_thread_params->message, 1) != 1)
-    {
-      perror("write");
-      exit(2);
-    }
+    sem_wait(&(A_thread_params->sem_A_to_B));
+
+    write(A_thread_params->pipeFile[1], buffer, BUFFER_SIZE);
+    sem_post(&(A_thread_params->sem_B_to_C)); //Flag thread B semaphore
   }
 
   fclose(fptr); //Close File pointer
-  
-  sem_post(&(A_thread_params->sem_justify)); //Flag thread B semaphore
   printf("ThreadA\n");
+  exit(0);
+
 }
+
+
 
 void *ThreadB(void *params)
 {
 
   ThreadParams *B_thread_params = (ThreadParams *)(params);
-
-  while(!sem_wait(&(B_thread_params->sem_justify)))
+  while (!sem_wait(&(B_thread_params->sem_B_to_C)))
   {
-      read(B_thread_params->pipeFile[1], B_thread_params->message, sizeof(B_thread_params->message)); // Read from the pipe
-      sem_post(&B_thread_params->sem_write);
+    read(B_thread_params->pipeFile[0], B_thread_params->message, BUFFER_SIZE); // Read from the pipe
+    printf("%s",B_thread_params->message);
+    sem_post(&B_thread_params->sem_C_to_A);
   }
+  printf("I've exited the loop");
 
   printf("ThreadB\n");
 }
+
+
 
 void *ThreadC(void *params)
 {
   ThreadParams *C_thread_params = (ThreadParams *)(params);
   // Open the file in which the content will be written to
   FILE* writeFile = fopen(C_thread_params->write_file, "w");
-  if(!writeFile)
+  if (!writeFile)
   {
-      perror("Invalid File");
-      exit(0);
+    perror("Invalid File");
+    exit(0);
   }
-  
-  while(!sem_wait(&C_thread_params->sem_write))
-    {
 
-    char check[12] = "end_header\n";
-    int content = 0;  //Flag for end of header file
-
+  int content = 0; //Flag for end of header file
+  while(!sem_wait(&(C_thread_params->sem_C_to_A)))
+  {
+    printf("runningC line\n");
     // Only write content if it's not apart of the header
     if (content)
     {
+      printf("printing to file\n");
       fputs(C_thread_params->message, writeFile);
     }
-    else if(strcmp(C_thread_params->message, check) == 0)   // check if content is apart of the header
+    else if (strcmp(C_thread_params->message, END_OF_HEADER) == 0) // check if content is apart of the header
     {
       content = 1; //Flags end of header
     }
 
-    sem_post(&C_thread_params->sem_read);
-    }
+    sem_post(&C_thread_params->sem_A_to_B);
+  }
 
   fclose(writeFile); // Close FILE*
   printf("ThreadC\n");
