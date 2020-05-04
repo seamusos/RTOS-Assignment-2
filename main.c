@@ -114,8 +114,8 @@ void initializeData(ThreadParams *params)
 {
   // Initialize Sempahores
   sem_init(&(params->sem_read), 0, 1);
-  sem_init(&(params->sem_justify), 0, 1);
-  sem_init(&(params->sem_write), 0, 1);
+  sem_init(&(params->sem_justify), 0, 0);
+  sem_init(&(params->sem_write), 0, 0);
 
   //TODO: add your code
 
