@@ -145,7 +145,7 @@ void *ThreadA(void *params)
   
   if ((fptr = fopen(A_thread_params->read_file, "r")) == NULL) //open read file
   {
-    printf("Error! opening file\n");
+    perror("Error! opening file\n");
     // Program exits if file pointer returns NULL.
     exit(1);
   }
@@ -153,7 +153,7 @@ void *ThreadA(void *params)
 
   while (fgets(buffer, sizeof(buffer), fptr) != NULL) //cycle through all lines of the file until complete
   {
-    sem_wait(&(A_thread_params->sem_A_to_B));
+    sem_wait(&(A_thread_params->sem_A_to_B)); //Thread must wait for semaphore to be sent/posted
 
     write(A_thread_params->pipeFile[1], buffer, BUFFER_SIZE); // the character line from the buffer to the pipe
     sem_post(&(A_thread_params->sem_B_to_C)); //Flag thread B semaphore to start
@@ -175,7 +175,11 @@ void *ThreadB(void *params)
 
   while (!sem_wait(&(B_thread_params->sem_B_to_C))) //run when a line has been placed in the pipe
   {
-    read(B_thread_params->pipeFile[0], B_thread_params->message, BUFFER_SIZE); // Read from the pipe
+    if (read(B_thread_params->pipeFile[0], B_thread_params->message, BUFFER_SIZE) < 0) // Read from the pipe
+    {
+      perror("Error reading from pipe\n");
+      exit(1);
+    }
     sem_post(&B_thread_params->sem_C_to_A); //signal to thread C to being
   }
 
