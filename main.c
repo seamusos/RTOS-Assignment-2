@@ -143,7 +143,6 @@ void *ThreadA(void *params)
   }
 
   fclose(fptr); //Close File pointer
-  printf("ThreadA\n");
   exit(0);
 
 }
@@ -157,10 +156,8 @@ void *ThreadB(void *params)
   while (!sem_wait(&(B_thread_params->sem_B_to_C)))
   {
     read(B_thread_params->pipeFile[0], B_thread_params->message, BUFFER_SIZE); // Read from the pipe
-    printf("%s",B_thread_params->message);
     sem_post(&B_thread_params->sem_C_to_A);
   }
-  printf("I've exited the loop");
 
   printf("ThreadB\n");
 }
@@ -181,11 +178,10 @@ void *ThreadC(void *params)
   int content = 0; //Flag for end of header file
   while(!sem_wait(&(C_thread_params->sem_C_to_A)))
   {
-    printf("runningC line\n");
     // Only write content if it's not apart of the header
     if (content)
     {
-      printf("printing to file\n");
+      printf("printing line to file: %s\n",C_thread_params->message);
       fputs(C_thread_params->message, writeFile);
     }
     else if (strcmp(C_thread_params->message, END_OF_HEADER) == 0) // check if content is apart of the header
@@ -197,5 +193,4 @@ void *ThreadC(void *params)
   }
 
   fclose(writeFile); // Close FILE*
-  printf("ThreadC\n");
 }
