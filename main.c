@@ -67,8 +67,15 @@ int main(int argc, char const *argv[])
 
   ThreadParams params;
 
-  strcpy(params.read_file, "data.txt");
-  strcpy(params.write_file, "output.txt");
+  if(argc != 3)
+  {
+    printf("ERROR: Please Enter datafile and name for writefile \n");
+    exit(0);
+  }
+
+  //Copy Text File Names from Arguements
+  strcpy(params.read_file, argv[1]);
+  strcpy(params.write_file, argv[2]);
 
   // Initialization
   initializeData(&params);
