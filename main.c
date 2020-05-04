@@ -110,7 +110,21 @@ int main(int argc, char const *argv[])
 
 void initializeData(ThreadParams *params)
 {
-  printf("welcome to the RTOS file converter, my name is clippy and I are here to provide all your file copy needs\n");
+  printf(" _________\n< welcome >\n _________\n \\\n  \\\n     __\n    /  \\\n    |  |\n    @  @\n    |  |\n    || |/\n    || ||\n    |\\_/|\n    \\___/\n\n\n");
+
+
+  printf("Welcome to the RTOS file converter, my name is clippy and I are here to provide all your file copy needs\n\n\n");
+
+
+  printf("This program will by default, take a file called data.txt and read it's content, it will then only print the content of the file to the file output.txt\n");
+  printf("if you wish to provide an alternate input file name, please do so in the form __________\n\n\n");
+
+  printf("Please be aware this file will overwrite any existing output.txt files that exist, control c to exit, else please press the enter key to continue \n");
+  while (getchar() != '\n');
+
+
+  
+
   // Initialize Sempahores
   sem_init(&(params->sem_A_to_B), 0, 1);
   sem_init(&(params->sem_B_to_C), 0, 0);
@@ -121,13 +135,15 @@ void initializeData(ThreadParams *params)
 
 void *ThreadA(void *params)
 {
-  /* note: Since the data_stract is declared as pointer. the A_thread_params->message */
+  //declare local variables
   ThreadParams *A_thread_params = (ThreadParams *)(params);
-  char buffer[BUFFER_SIZE];
+  char buffer[BUFFER_SIZE]; // temporary variable to store the text from the file
+
+  //open read file
   printf("Opening your file to read\n");
   FILE *fptr; //File pointer for Read File
   
-  if ((fptr = fopen(A_thread_params->read_file, "r")) == NULL)
+  if ((fptr = fopen(A_thread_params->read_file, "r")) == NULL) //open read file
   {
     printf("Error! opening file\n");
     // Program exits if file pointer returns NULL.
@@ -135,17 +151,18 @@ void *ThreadA(void *params)
   }
   printf("reading from your file: %s\n",A_thread_params->read_file);
 
-  while (fgets(buffer, sizeof(buffer), fptr) != NULL)
+  while (fgets(buffer, sizeof(buffer), fptr) != NULL) //cycle through all lines of the file until complete
   {
     sem_wait(&(A_thread_params->sem_A_to_B));
 
-    write(A_thread_params->pipeFile[1], buffer, BUFFER_SIZE);
-    sem_post(&(A_thread_params->sem_B_to_C)); //Flag thread B semaphore
+    write(A_thread_params->pipeFile[1], buffer, BUFFER_SIZE); // the character line from the buffer to the pipe
+    sem_post(&(A_thread_params->sem_B_to_C)); //Flag thread B semaphore to start
   }
 
-  
+
   fclose(fptr); //Close File pointer
-  exit(0);
+  printf("Thank you for using the clippy service, have a nice day!\n");
+  exit(0); // Exit the program
 
 }
 
@@ -153,21 +170,22 @@ void *ThreadA(void *params)
 
 void *ThreadB(void *params)
 {
-
+  //declare local variables
   ThreadParams *B_thread_params = (ThreadParams *)(params);
-  while (!sem_wait(&(B_thread_params->sem_B_to_C)))
+
+  while (!sem_wait(&(B_thread_params->sem_B_to_C))) //run when a line has been placed in the pipe
   {
     read(B_thread_params->pipeFile[0], B_thread_params->message, BUFFER_SIZE); // Read from the pipe
-    sem_post(&B_thread_params->sem_C_to_A);
+    sem_post(&B_thread_params->sem_C_to_A); //signal to thread C to being
   }
 
-  printf("ThreadB\n");
 }
 
 
 
 void *ThreadC(void *params)
 {
+  //declare local variables
   ThreadParams *C_thread_params = (ThreadParams *)(params);
   // Open the file in which the content will be written to
   printf("opening your write file\n");
@@ -177,8 +195,8 @@ void *ThreadC(void *params)
     perror("Invalid File\n");
     exit(0);
   }
-
-  printf("your output file will now be printed\n");
+  
+  printf("your output file will now be printed\n\n");
   int content = 0; //Flag for end of header file
   while(!sem_wait(&(C_thread_params->sem_C_to_A)))
   {
@@ -196,5 +214,6 @@ void *ThreadC(void *params)
     sem_post(&C_thread_params->sem_A_to_B);
   }
 
+  printf("your file has been written with your data\n");
   fclose(writeFile); // Close FILE*
 }
