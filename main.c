@@ -32,7 +32,7 @@
 #define END_OF_HEADER "end_header\n"
 #define BUFFER_SIZE 255
 #define DEFAULT_READ_FILE  "data.txt"
-#define DEFAULT_WRITE_FILE  ".txt"
+#define DEFAULT_WRITE_FILE  "output.txt"
 
 /* --- Structs --- */
 
