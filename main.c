@@ -40,7 +40,6 @@ typedef struct ThreadParams
   sem_t sem_A_to_B, sem_B_to_C, sem_C_to_A;
   char message[255];
   char read_file[100], write_file[100];
-
 } ThreadParams;
 
 /* --- Prototypes --- */
@@ -225,8 +224,7 @@ void Welcome()
 
   printf("Welcome to the RTOS file converter, my name is clippy and I are here to provide all your file copy needs\n\n\n");
 
-
-  printf("This program will by default, take a file called data.txt and read it's content, it will then only print the content of the file to the file output.txt\n");
+  printf("This program will by default, take a file named in the input arguements and read it's content, it will then only print the content of the file to a user defined text file by default output.txt\n");
 
   printf("Please press the enter key to continue \n");
   while (getchar() != '\n');
