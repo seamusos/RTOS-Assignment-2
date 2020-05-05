@@ -30,9 +30,9 @@
 /* --- Global Definitions --- */
 
 #define END_OF_HEADER "end_header\n"
-#define BUFFER_SIZE 255
 #define DEFAULT_READ_FILE  "data.txt"
 #define DEFAULT_WRITE_FILE  "output.txt"
+#define BUFFER_SIZE 255
 
 /* --- Structs --- */
 
@@ -87,8 +87,6 @@ int main(int argc, char const *argv[])
     strcpy(params.read_file, argv[1]);
     strcpy(params.write_file, argv[2]);
   }
-
-
 
   // Initialization
   initializeData(&params);
@@ -150,6 +148,7 @@ void initializeData(ThreadParams *params)
   return;
 }
 
+
 void *ThreadA(void *params)
 {
   
@@ -185,7 +184,6 @@ void *ThreadA(void *params)
 }
 
 
-
 void *ThreadB(void *params)
 {
   //declare local variables
@@ -202,7 +200,6 @@ void *ThreadB(void *params)
   }
 
 }
-
 
 
 void *ThreadC(void *params)
@@ -239,6 +236,7 @@ void *ThreadC(void *params)
   printf("Your file has been written with your data\n");
   fclose(writeFile); // Close FILE*
 }
+
 
 void Welcome()
 {
