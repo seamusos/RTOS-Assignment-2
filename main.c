@@ -31,6 +31,8 @@
 
 #define END_OF_HEADER "end_header\n"
 #define BUFFER_SIZE 255
+#define DEFAULT_READ_FILE  "data.txt"
+#define DEFAULT_WRITE_FILE  "output.txt"
 
 /* --- Structs --- */
 
@@ -40,7 +42,6 @@ typedef struct ThreadParams
   sem_t sem_A_to_B, sem_B_to_C, sem_C_to_A;
   char message[255];
   char read_file[100], write_file[100];
-
 } ThreadParams;
 
 /* --- Prototypes --- */
@@ -57,7 +58,7 @@ void *ThreadB(void *params);
 /* This thread reads from shared variable and outputs non-header text to src.txt */
 void *ThreadC(void *params);
 
-/* This function allows the welcome messages to pbe printed and updated as necessary */
+/* This function allows the welcome messages to be printed and updated as necessary */
 void Welcome();
 
 /* --- Main Code --- */
@@ -69,9 +70,25 @@ int main(int argc, char const *argv[])
   pthread_attr_t attr;
 
   ThreadParams params;
+  
+  Welcome(); //Runs Welcome Function
 
-  strcpy(params.read_file, "data.txt");
-  strcpy(params.write_file, "output.txt");
+  if(argc != 3)
+  {
+    printf("No User Defined inputs, resulting to default file names \n");
+    strcpy(params.read_file, DEFAULT_READ_FILE);
+    strcpy(params.write_file, DEFAULT_WRITE_FILE);
+  }
+  else
+  {
+    printf("User Defined Read File = %s \n", argv[1]);
+    printf("User Defined Write File = %s \n", argv[2]);
+    //Copy Text File Names from Arguements
+    strcpy(params.read_file, argv[1]);
+    strcpy(params.write_file, argv[2]);
+  }
+
+
 
   // Initialization
   initializeData(&params);
@@ -113,7 +130,7 @@ int main(int argc, char const *argv[])
 
 void initializeData(ThreadParams *params)
 {
-  Welcome();
+
   // Initialize Sempahores
   sem_init(&(params->sem_A_to_B), 0, 1);
   sem_init(&(params->sem_B_to_C), 0, 0);
@@ -218,10 +235,9 @@ void Welcome()
 
   printf("Welcome to the RTOS file converter, my name is clippy and I are here to provide all your file copy needs\n\n\n");
 
+  printf("If you provided an input and output file name the terminal this program otherwise \n");
+  printf("This program will by default, take a file named data.txt in for the input file and read it's content, it will then only print the content of the file to a user defined text file by default output.txt\n");
 
-  printf("This program will by default, take a file called data.txt and read it's content, it will then only print the content of the file to the file output.txt\n");
-  printf("If you wish to provide an alternate input file name, please do so in the form __________\n\n\n");
-
-  printf("Please be aware this file will overwrite any existing output.txt files that exist, control c to exit, else please press the enter key to continue \n");
+  printf("Please press the enter key to continue \n");
   while (getchar() != '\n');
 }
