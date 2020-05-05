@@ -152,7 +152,7 @@ void *ThreadA(void *params)
   
   if ((fptr = fopen(A_thread_params->read_file, "r")) == NULL) //open read file
   {
-    perror("Error! opening file\n");
+    perror("Error! opening file please confirm that you entered the file name correctly\n");
     // Program exits if file pointer returns NULL.
     exit(1);
   }
