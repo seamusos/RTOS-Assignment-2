@@ -70,6 +70,8 @@ int main(int argc, char const *argv[])
   pthread_attr_t attr;
 
   ThreadParams params;
+  
+  Welcome(); //Runs Welcome Function
 
   if(argc != 3)
   {
@@ -128,7 +130,7 @@ int main(int argc, char const *argv[])
 
 void initializeData(ThreadParams *params)
 {
-  Welcome();
+
   // Initialize Sempahores
   sem_init(&(params->sem_A_to_B), 0, 1);
   sem_init(&(params->sem_B_to_C), 0, 0);
