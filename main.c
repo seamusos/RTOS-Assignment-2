@@ -30,9 +30,9 @@
 /* --- Global Definitions --- */
 
 #define END_OF_HEADER "end_header\n"
-#define BUFFER_SIZE 255
 #define DEFAULT_READ_FILE  "data.txt"
 #define DEFAULT_WRITE_FILE  "output.txt"
+#define BUFFER_SIZE 255
 
 /* --- Structs --- */
 
@@ -88,8 +88,6 @@ int main(int argc, char const *argv[])
     strcpy(params.write_file, argv[2]);
   }
 
-
-
   // Initialization
   initializeData(&params);
   pthread_attr_init(&attr);
@@ -132,12 +130,24 @@ void initializeData(ThreadParams *params)
 {
 
   // Initialize Sempahores
-  sem_init(&(params->sem_A_to_B), 0, 1);
-  sem_init(&(params->sem_B_to_C), 0, 0);
-  sem_init(&(params->sem_C_to_A), 0, 0);
-
+  if(sem_init(&(params->sem_A_to_B), 0, 1))
+  {
+    perror("Error initalising thread");
+    exit(0);
+  }
+  if(sem_init(&(params->sem_B_to_C), 0, 0))
+  {
+    perror("Error initalising thread");
+    exit(0);
+  }
+  if(sem_init(&(params->sem_C_to_A), 0, 0))
+  {
+    perror("Error initalising thread");
+    exit(0);
+  }
   return;
 }
+
 
 void *ThreadA(void *params)
 {
@@ -152,7 +162,7 @@ void *ThreadA(void *params)
   
   if ((fptr = fopen(A_thread_params->read_file, "r")) == NULL) //open read file
   {
-    perror("Error! opening file\n");
+    perror("Error! opening file please confirm that you entered the file name correctly\n");
     // Program exits if file pointer returns NULL.
     exit(1);
   }
@@ -174,7 +184,6 @@ void *ThreadA(void *params)
 }
 
 
-
 void *ThreadB(void *params)
 {
   //declare local variables
@@ -191,7 +200,6 @@ void *ThreadB(void *params)
   }
 
 }
-
 
 
 void *ThreadC(void *params)
@@ -229,13 +237,14 @@ void *ThreadC(void *params)
   fclose(writeFile); // Close FILE*
 }
 
+
 void Welcome()
 {
   printf(" _________\n< welcome >\n _________\n \\\n  \\\n     __\n    /  \\\n    |  |\n    @  @\n    |  |\n    || |/\n    || ||\n    |\\_/|\n    \\___/\n\n\n");
 
   printf("Welcome to the RTOS file converter, my name is clippy and I are here to provide all your file copy needs\n\n\n");
 
-  printf("If you provided an input and output file name the terminal this program otherwise \n");
+  printf("If you provided an input and output file name in the terminal, those file names will be used, otherwise \n");
   printf("This program will by default, take a file named data.txt in for the input file and read it's content, it will then only print the content of the file to a user defined text file by default output.txt\n");
 
   printf("Please press the enter key to continue \n");
