@@ -31,6 +31,8 @@
 
 #define END_OF_HEADER "end_header\n"
 #define BUFFER_SIZE 255
+#define DEFAULT_READ_FILE  "data.txt"
+#define DEFAULT_WRITE_FILE  ".txt"
 
 /* --- Structs --- */
 
@@ -71,13 +73,20 @@ int main(int argc, char const *argv[])
 
   if(argc != 3)
   {
-    printf("ERROR: Please Enter datafile and name for writefile \n");
-    exit(0);
+    printf("No User Defined inputs, resulting to default file names \n");
+    strcpy(params.read_file, DEFAULT_READ_FILE);
+    strcpy(params.write_file, DEFAULT_WRITE_FILE);
+  }
+  else
+  {
+    printf("User Defined Read File = %s \n", argv[1]);
+    printf("User Defined Write File = %s \n", argv[2]);
+    //Copy Text File Names from Arguements
+    strcpy(params.read_file, argv[1]);
+    strcpy(params.write_file, argv[2]);
   }
 
-  //Copy Text File Names from Arguements
-  strcpy(params.read_file, argv[1]);
-  strcpy(params.write_file, argv[2]);
+
 
   // Initialization
   initializeData(&params);
