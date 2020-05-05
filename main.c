@@ -58,7 +58,7 @@ void *ThreadB(void *params);
 /* This thread reads from shared variable and outputs non-header text to src.txt */
 void *ThreadC(void *params);
 
-/* This function allows the welcome messages to pbe printed and updated as necessary */
+/* This function allows the welcome messages to be printed and updated as necessary */
 void Welcome();
 
 /* --- Main Code --- */
