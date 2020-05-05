@@ -113,6 +113,7 @@ int main(int argc, char const *argv[])
 
 void initializeData(ThreadParams *params)
 {
+  Welcome();
   // Initialize Sempahores
   sem_init(&(params->sem_A_to_B), 0, 1);
   sem_init(&(params->sem_B_to_C), 0, 0);
@@ -123,7 +124,7 @@ void initializeData(ThreadParams *params)
 
 void *ThreadA(void *params)
 {
-  Welcome();
+  
   //declare local variables
   ThreadParams *A_thread_params = (ThreadParams *)(params);
   char buffer[BUFFER_SIZE]; // temporary variable to store the text from the file
