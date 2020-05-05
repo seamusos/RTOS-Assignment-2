@@ -227,8 +227,7 @@ void Welcome()
 
 
   printf("This program will by default, take a file called data.txt and read it's content, it will then only print the content of the file to the file output.txt\n");
-  printf("If you wish to provide an alternate input file name, please do so in the form __________\n\n\n");
 
-  printf("Please be aware this file will overwrite any existing output.txt files that exist, control c to exit, else please press the enter key to continue \n");
+  printf("Please press the enter key to continue \n");
   while (getchar() != '\n');
 }
