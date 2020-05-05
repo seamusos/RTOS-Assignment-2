@@ -132,10 +132,21 @@ void initializeData(ThreadParams *params)
 {
 
   // Initialize Sempahores
-  sem_init(&(params->sem_A_to_B), 0, 1);
-  sem_init(&(params->sem_B_to_C), 0, 0);
-  sem_init(&(params->sem_C_to_A), 0, 0);
-
+  if(sem_init(&(params->sem_A_to_B), 0, 1))
+  {
+    perror("Error initalising thread");
+    exit(0);
+  }
+  if(sem_init(&(params->sem_B_to_C), 0, 0))
+  {
+    perror("Error initalising thread");
+    exit(0);
+  }
+  if(sem_init(&(params->sem_C_to_A), 0, 0))
+  {
+    perror("Error initalising thread");
+    exit(0);
+  }
   return;
 }
 
