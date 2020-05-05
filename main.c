@@ -235,7 +235,8 @@ void Welcome()
 
   printf("Welcome to the RTOS file converter, my name is clippy and I are here to provide all your file copy needs\n\n\n");
 
-  printf("This program will by default, take a file named in the input arguements and read it's content, it will then only print the content of the file to a user defined text file by default output.txt\n");
+  printf("If you provided an input and output file name the terminal this program otherwise \n");
+  printf("This program will by default, take a file named data.txt in for the input file and read it's content, it will then only print the content of the file to a user defined text file by default output.txt\n");
 
   printf("Please press the enter key to continue \n");
   while (getchar() != '\n');
